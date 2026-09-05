@@ -24,18 +24,14 @@ public class Shooting : MonoBehaviour
 
     void Start()
     {
-        // Start with RED bullet
         currentBulletColor = redColor;
-
         UpdateBulletUI();
     }
 
     void Update()
     {
-        // Change bullet color
         SelectBulletColor();
 
-        // Shoot with left mouse button
         if (Mouse.current != null &&
             Mouse.current.leftButton.wasPressedThisFrame)
         {
@@ -45,42 +41,36 @@ public class Shooting : MonoBehaviour
 
     void SelectBulletColor()
     {
-        // 1 = RED
         if (Keyboard.current.digit1Key.wasPressedThisFrame)
         {
             currentBulletColor = redColor;
             UpdateBulletUI();
         }
 
-        // 2 = BLUE
         if (Keyboard.current.digit2Key.wasPressedThisFrame)
         {
             currentBulletColor = blueColor;
             UpdateBulletUI();
         }
 
-        // 3 = GREEN
         if (Keyboard.current.digit3Key.wasPressedThisFrame)
         {
             currentBulletColor = greenColor;
             UpdateBulletUI();
         }
 
-        // 4 = YELLOW
         if (Keyboard.current.digit4Key.wasPressedThisFrame)
         {
             currentBulletColor = yellowColor;
             UpdateBulletUI();
         }
 
-        // 5 = PURPLE
         if (Keyboard.current.digit5Key.wasPressedThisFrame)
         {
             currentBulletColor = purpleColor;
             UpdateBulletUI();
         }
 
-        // 6 = ORANGE
         if (Keyboard.current.digit6Key.wasPressedThisFrame)
         {
             currentBulletColor = orangeColor;
@@ -121,22 +111,20 @@ public class Shooting : MonoBehaviour
         }
     }
 
-   public void Shoot()
+    public void Shoot()
     {
         if (GameManager.Instance != null)
-{
-    if (!GameManager.Instance.TryUseAmmo())
-        return;
-}
+        {
+            if (!GameManager.Instance.TryUseAmmo())
+                return;
+        }
 
-        // Create the bullet
         GameObject bullet = Instantiate(
             bulletPrefab,
             bulletSpawnPoint.position,
             bulletSpawnPoint.rotation
         );
 
-        // Change the bullet's visual color
         Renderer bulletRenderer =
             bullet.GetComponent<Renderer>();
 
@@ -146,7 +134,6 @@ public class Shooting : MonoBehaviour
                 currentBulletColor;
         }
 
-        // Make the bullet move forward
         Rigidbody rb =
             bullet.GetComponent<Rigidbody>();
 
@@ -156,54 +143,42 @@ public class Shooting : MonoBehaviour
                 bulletSpawnPoint.forward * bulletSpeed;
         }
 
-        // Give the bullet its color
-        BulletCollision collision =
-            bullet.GetComponent<BulletCollision>();
-
-        if (collision != null)
-        {
-            collision.bulletColor =
-                currentBulletColor;
-        }
-
-        // Destroy bullet after 5 seconds
         Destroy(bullet, 5f);
     }
 
-public void SelectRed()
-{
-    currentBulletColor = redColor;
-    UpdateBulletUI();
-}
+    public void SelectRed()
+    {
+        currentBulletColor = redColor;
+        UpdateBulletUI();
+    }
 
-public void SelectBlue()
-{
-    currentBulletColor = blueColor;
-    UpdateBulletUI();
-}
+    public void SelectBlue()
+    {
+        currentBulletColor = blueColor;
+        UpdateBulletUI();
+    }
 
-public void SelectGreen()
-{
-    currentBulletColor = greenColor;
-    UpdateBulletUI();
-}
+    public void SelectGreen()
+    {
+        currentBulletColor = greenColor;
+        UpdateBulletUI();
+    }
 
-public void SelectYellow()
-{
-    currentBulletColor = yellowColor;
-    UpdateBulletUI();
-}
+    public void SelectYellow()
+    {
+        currentBulletColor = yellowColor;
+        UpdateBulletUI();
+    }
 
-public void SelectPurple()
-{
-    currentBulletColor = purpleColor;
-    UpdateBulletUI();
-}
+    public void SelectPurple()
+    {
+        currentBulletColor = purpleColor;
+        UpdateBulletUI();
+    }
 
-public void SelectOrange()
-{
-    currentBulletColor = orangeColor;
-    UpdateBulletUI();
-}
-
+    public void SelectOrange()
+    {
+        currentBulletColor = orangeColor;
+        UpdateBulletUI();
+    }
 }

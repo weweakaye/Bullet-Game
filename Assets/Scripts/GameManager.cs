@@ -234,4 +234,9 @@ public int requiredObjectives = 4;
         return !levelFinished &&
                ammoRemaining > 0;
     }
+
+    public void DummyKilled()
+{
+    Debug.Log("DUMMY KILLED!");
+}
 }
