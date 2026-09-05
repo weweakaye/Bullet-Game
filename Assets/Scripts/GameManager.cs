@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,9 +6,9 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("Level Settings")]
-public int startingAmmo = 10;
-public float levelTime = 60f;
-public int requiredObjectives = 4;
+    public int startingAmmo = 10;
+    public float levelTime = 60f;
+    public int requiredDummies = 5;
 
     [Header("UI")]
     public LevelUI levelUI;
@@ -17,11 +16,9 @@ public int requiredObjectives = 4;
     private int ammoRemaining;
     private float timeRemaining;
 
-    private int correctObjects = 0;
-    private int incorrectShots = 0;
-
-    private List<ObjectiveTarget> objectives =
-        new List<ObjectiveTarget>();
+    private int ammoPickedUp = 0;
+    private int shotsFired = 0;
+    private int dummiesKilled = 0;
 
     private bool levelFinished = false;
 
@@ -31,14 +28,14 @@ public int requiredObjectives = 4;
     }
 
     void Start()
-{
-    Time.timeScale = 1f;
+    {
+        Time.timeScale = 1f;
 
-    ammoRemaining = startingAmmo;
-    timeRemaining = levelTime;
+        ammoRemaining = startingAmmo;
+        timeRemaining = levelTime;
 
-    UpdateUI();
-}
+        UpdateUI();
+    }
 
     void Update()
     {
@@ -47,11 +44,14 @@ public int requiredObjectives = 4;
 
         timeRemaining -= Time.deltaTime;
 
-        if (timeRemaining <= 0)
+        if (timeRemaining <= 0f)
         {
-            timeRemaining = 0;
+            timeRemaining = 0f;
+
             UpdateUI();
+
             LoseLevel();
+
             return;
         }
 
@@ -59,113 +59,106 @@ public int requiredObjectives = 4;
     }
 
     // =========================
-    // OBJECTIVES
+    // SHOOTING / AMMO
     // =========================
 
-    public void RegisterObjective(ObjectiveTarget target)
+    public bool TryUseAmmo()
     {
-        if (!objectives.Contains(target))
+        if (levelFinished)
+            return false;
+
+        if (ammoRemaining <= 0)
         {
-            objectives.Add(target);
+            Debug.Log("NO AMMO!");
+
+            // IMPORTANT:
+            // Running out of ammo does NOT cause defeat.
+            return false;
         }
+
+        ammoRemaining--;
+
+        shotsFired++;
+
+        Debug.Log(
+            "SHOT FIRED! Ammo remaining: " +
+            ammoRemaining
+        );
+
+        UpdateUI();
+
+        return true;
     }
 
-    public void ObjectHit(
-        ObjectiveTarget target,
-        BulletColor required,
-        BulletColor actual)
+    public void RefillAmmo()
     {
         if (levelFinished)
             return;
 
-        if (actual == required)
-        {
-            correctObjects++;
+        ammoRemaining = startingAmmo;
 
-            Debug.Log(
-                "CORRECT! " +
-                target.name +
-                " | Correct: " +
-                correctObjects
-            );
-        }
-        else
-        {
-            incorrectShots++;
+        ammoPickedUp++;
 
-            Debug.Log(
-                "INCORRECT! " +
-                target.name +
-                " | Incorrect: " +
-                incorrectShots
-            );
-        }
+        Debug.Log(
+            "AMMO PICKED UP! Total pickups: " +
+            ammoPickedUp
+        );
+
+        UpdateUI();
+    }
+
+    // =========================
+    // TRAINING DUMMIES
+    // =========================
+
+    public void DummyKilled()
+    {
+        if (levelFinished)
+            return;
+
+        dummiesKilled++;
+
+        Debug.Log(
+            "DUMMY KILLED! " +
+            dummiesKilled +
+            "/" +
+            requiredDummies
+        );
 
         UpdateUI();
 
-        CheckWin();
+        if (dummiesKilled >= requiredDummies)
+        {
+            WinLevel();
+        }
     }
 
     // =========================
-    // AMMO
+    // WIN
     // =========================
-
-   public bool TryUseAmmo()
-{
-    if (levelFinished)
-        return false;
-
-    if (ammoRemaining <= 0)
-    {
-        Debug.Log("NO AMMO!");
-        LoseLevel();
-        return false;
-    }
-
-    ammoRemaining--;
-
-    Debug.Log("SHOT FIRED! Ammo remaining: " + ammoRemaining);
-
-    UpdateUI();
-
-    return true;
-}
-
-    // =========================
-    // WIN / LOSE
-    // =========================
-
-    void CheckWin()
-{
-    Debug.Log(
-        "CHECK WIN → Correct: " +
-        correctObjects +
-        " | Objectives registered: " +
-        objectives.Count
-    );
-
-    if (correctObjects >= requiredObjectives)
-{
-    WinLevel();
-}
-}
 
     void WinLevel()
     {
+        if (levelFinished)
+            return;
+
         levelFinished = true;
 
-        Debug.Log("LEVEL COMPLETE!");
+        Debug.Log("========== VICTORY ==========");
 
         if (levelUI != null)
         {
-            levelUI.ShowStats(
-                correctObjects,
-                incorrectShots,
-                ammoRemaining,
-                timeRemaining
+            levelUI.ShowWeek11Victory(
+                ammoPickedUp,
+                shotsFired,
+                dummiesKilled
             );
         }
     }
+
+    // =========================
+    // LOSE
+    // =========================
 
     void LoseLevel()
     {
@@ -174,11 +167,19 @@ public int requiredObjectives = 4;
 
         levelFinished = true;
 
-        Debug.Log("YOU LOSE!");
+        Debug.Log("========== DEFEAT ==========");
 
         if (levelUI != null)
         {
-            levelUI.ShowLose();
+            levelUI.ShowWeek11Defeat(
+                ammoPickedUp,
+                shotsFired,
+                dummiesKilled
+            );
+        }
+        else
+        {
+            ReturnToMenu();
         }
     }
 
@@ -187,26 +188,27 @@ public int requiredObjectives = 4;
     // =========================
 
     void UpdateUI()
-    {
-        if (levelUI == null)
-            return;
+{
+    if (levelUI == null)
+        return;
 
-        levelUI.UpdateTimer(timeRemaining);
-        levelUI.UpdateAmmo(ammoRemaining);
-        levelUI.UpdateStats(
-            correctObjects,
-            incorrectShots
-        );
-    }
+    levelUI.UpdateTimer(timeRemaining);
+    levelUI.UpdateAmmo(ammoRemaining);
+
+    levelUI.UpdateDummiesKilled(
+        dummiesKilled,
+        requiredDummies
+    );
+}
 
     // =========================
     // BUTTONS
     // =========================
 
     public void GoToNextLevel()
-{
-    SceneManager.LoadScene("GameLevel2");
-}
+    {
+        SceneManager.LoadScene("Level2");
+    }
 
     public void RetryLevel()
     {
@@ -217,13 +219,15 @@ public int requiredObjectives = 4;
 
     public void ReturnToMenu()
     {
+        Time.timeScale = 1f;
+
         SceneManager.LoadScene("MainMenu");
     }
 
     public void ExitGame()
-{
-    Application.Quit();
-}
+    {
+        Application.Quit();
+    }
 
     // =========================
     // SHOOTING CHECK
@@ -234,9 +238,4 @@ public int requiredObjectives = 4;
         return !levelFinished &&
                ammoRemaining > 0;
     }
-
-    public void DummyKilled()
-{
-    Debug.Log("DUMMY KILLED!");
-}
 }

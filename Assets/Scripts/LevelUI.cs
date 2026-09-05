@@ -6,23 +6,19 @@ public class LevelUI : MonoBehaviour
     [Header("HUD")]
     public TMP_Text timerText;
     public TMP_Text ammoText;
-    public TMP_Text correctText;
-    public TMP_Text incorrectText;
+    public TMP_Text dummiesKilledText;
 
     [Header("Windows")]
     public GameObject statsWindow;
     public GameObject loseWindow;
 
-    [Header("Stats")]
-    public TMP_Text statsCorrectText;
-    public TMP_Text statsIncorrectText;
-    public TMP_Text statsAmmoText;
-    public TMP_Text statsTimeText;
-    public TMP_Text scoreText;
+    [Header("Week 11 Statistics")]
+    public TMP_Text statsAmmoPickedUpText;
+    public TMP_Text statsShotsFiredText;
+    public TMP_Text statsDummiesKilledText;
 
     void Start()
     {
-        // Hide result windows at the beginning
         if (statsWindow != null)
             statsWindow.SetActive(false);
 
@@ -53,81 +49,80 @@ public class LevelUI : MonoBehaviour
         }
     }
 
-    public void UpdateStats(int correct, int incorrect)
+    public void UpdateDummiesKilled(int killed, int required)
     {
-        if (correctText != null)
+        if (dummiesKilledText != null)
         {
-            correctText.text = "Correct: " + correct;
-        }
-
-        if (incorrectText != null)
-        {
-            incorrectText.text = "Incorrect: " + incorrect;
+            dummiesKilledText.text =
+                "DUMMIES: " + killed + " / " + required;
         }
     }
 
-    public void ShowStats(
-        int correct,
-        int incorrect,
-        int ammo,
-        float time)
+    public void ShowWeek11Victory(
+        int ammoPickedUp,
+        int shotsFired,
+        int dummiesKilled)
     {
-        Debug.Log("SHOWING STATS WINDOW");
+        if (statsAmmoPickedUpText != null)
+        {
+            statsAmmoPickedUpText.text =
+                "Ammo Picked Up: " + ammoPickedUp;
+        }
 
-        if (statsCorrectText != null)
-            statsCorrectText.text =
-                "Correct Objects: " + correct;
+        if (statsShotsFiredText != null)
+        {
+            statsShotsFiredText.text =
+                "Shots Fired: " + shotsFired;
+        }
 
-        if (statsIncorrectText != null)
-            statsIncorrectText.text =
-                "Incorrect Shots: " + incorrect;
-
-        if (statsAmmoText != null)
-            statsAmmoText.text =
-                "Remaining Ammo: " + ammo;
-
-        if (statsTimeText != null)
-            statsTimeText.text =
-                "Remaining Time: " +
-                Mathf.CeilToInt(time);
-
-        int score =
-            (correct * 100) -
-            (incorrect * 25) +
-            (ammo * 5) +
-            Mathf.CeilToInt(time);
-
-        if (score < 0)
-            score = 0;
-
-        if (scoreText != null)
-            scoreText.text =
-                "Score: " + score;
+        if (statsDummiesKilledText != null)
+        {
+            statsDummiesKilledText.text =
+                "Dummies Killed: " + dummiesKilled;
+        }
 
         if (statsWindow != null)
         {
             statsWindow.SetActive(true);
-            Debug.Log("StatsWindow was activated!");
-        }
-        else
-        {
-            Debug.LogError(
-                "Stats Window is NOT assigned in LevelUI!"
-            );
         }
     }
 
-    public void ShowLose()
+    public void ShowWeek11Defeat(
+        int ammoPickedUp,
+        int shotsFired,
+        int dummiesKilled)
     {
+        if (statsAmmoPickedUpText != null)
+        {
+            statsAmmoPickedUpText.text =
+                "Ammo Picked Up: " + ammoPickedUp;
+        }
+
+        if (statsShotsFiredText != null)
+        {
+            statsShotsFiredText.text =
+                "Shots Fired: " + shotsFired;
+        }
+
+        if (statsDummiesKilledText != null)
+        {
+            statsDummiesKilledText.text =
+                "Dummies Killed: " + dummiesKilled;
+        }
+
         if (loseWindow != null)
         {
             loseWindow.SetActive(true);
         }
-        else
+
+        Invoke(nameof(ReturnToMainMenu), 3f);
+    }
+
+    void ReturnToMainMenu()
+    {
+        if (GameManager.Instance != null)
         {
-            Debug.LogError(
-                "Lose Window is NOT assigned in LevelUI!"
-            );
+            GameManager.Instance.ReturnToMenu();
         }
     }
 }
